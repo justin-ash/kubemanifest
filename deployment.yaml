@@ -1,0 +1,122 @@
+# ConfigMap to store configuration data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+data:
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+
+---
+# Secret to store sensitive data (e.g., database password)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: default
+type: Opaque
+data:
+  DB_PASSWORD: c3VwZXJzZWNyZXRwYXNzd29yZA==  # This is the base64 encoded form of "supersecretpassword"
+
+---
+# PersistentVolume to provide storage
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: app-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"  # Path on the node machine
+
+---
+# PersistentVolumeClaim to claim storage from PersistentVolume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# Deployment to manage the application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp-container
+        image: nginx:latest  # Replace this with your actual application image
+        ports:
+        - containerPort: 80
+        env:
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: APP_ENV
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: app-storage
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: app-storage
+        persistentVolumeClaim:
+          claimName: app-pvc
+
+---
+# Pod to run an additional workload if needed (can also be part of the deployment)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: standalone-pod
+  labels:
+    app: standalone
+spec:
+  containers:
+  - name: standalone-container
+    image: busybox
+    command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
+  volumes:
+  - name: app-storage
+    persistentVolumeClaim:
+      claimName: app-pvc
+
+---
+# Service to expose the application
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer  # Use NodePort or ClusterIP based on your use case

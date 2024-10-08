@@ -4,6 +4,10 @@ kind: ConfigMap
 metadata:
   name: app-config
   namespace: default
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 data:
   APP_ENV: "production"
   LOG_LEVEL: "info"
@@ -15,6 +19,10 @@ kind: Secret
 metadata:
   name: app-secret
   namespace: default
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 type: Opaque
 data:
   DB_PASSWORD: c3VwZXJzZWNyZXRwYXNzd29yZA==  # This is the base64 encoded form of "supersecretpassword"
@@ -25,6 +33,10 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: app-pv
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 spec:
   capacity:
     storage: 1Gi
@@ -39,6 +51,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: app-pvc
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 spec:
   accessModes:
     - ReadWriteOnce
@@ -52,6 +68,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app-deployment
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
   labels:
     app: myapp
 spec:
@@ -96,6 +116,9 @@ metadata:
   name: standalone-pod
   labels:
     app: standalone
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 spec:
   containers:
   - name: standalone-container
@@ -112,6 +135,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: app-service
+  labels:
+    app.kubernetes.io/instance: "a17cdc20-378b-4c57-b16a-91f8cdcb3dc3"
+    app.armada.ai/name: "kubemanifest"
+    app.armada.ai/type: "armada"
 spec:
   selector:
     app: myapp
